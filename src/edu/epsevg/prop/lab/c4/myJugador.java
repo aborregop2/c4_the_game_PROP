@@ -17,7 +17,7 @@ public class myJugador implements Jugador, IAuto {
                 Tauler newBoard = new Tauler(t);
                 newBoard.afegeix(col, color);
 
-                //int score = minimax(newBoard, maxDepth - 1, true, color);
+                int score = minimax(newBoard, maxDepth - 1, true, color);
                 
                 if (score > bestScore) {
                     bestScore = score;
@@ -42,7 +42,7 @@ public class myJugador implements Jugador, IAuto {
                     Tauler newBoard = new Tauler(board);
                     newBoard.afegeix(col, color);
 
-                    //int eval = minimax(newBoard, depth - 1, true, color);
+                    int eval = minimax(newBoard, depth - 1, true, color);
                     maxEval = Math.max(maxEval, eval);
                 }
             }
@@ -55,7 +55,7 @@ public class myJugador implements Jugador, IAuto {
                     Tauler newBoard = new Tauler(board);
                     newBoard.afegeix(col, opponentColor);
 
-                    //int eval = minimax(newBoard, depth - 1, false, color);
+                    int eval = minimax(newBoard, depth - 1, false, color);
                     minEval = Math.min(minEval, eval);
                 }
             }
