@@ -34,7 +34,6 @@ public class myJugador implements Jugador, IAuto {
             return heuristic(board, color);
         }
 
-        int opponentColor = -color;
         if (isMaximizing) {
             int maxEval = Integer.MIN_VALUE;
             for (int col = 0; col < board.getMida(); col++) {
@@ -53,7 +52,7 @@ public class myJugador implements Jugador, IAuto {
             for (int col = 0; col < board.getMida(); col++) {
                 if (board.movpossible(col)) {
                     Tauler newBoard = new Tauler(board);
-                    newBoard.afegeix(col, opponentColor);
+                    newBoard.afegeix(col, -color);
 
                     int eval = minimax(newBoard, depth - 1, false, color);
                     minEval = Math.min(minEval, eval);
@@ -65,16 +64,6 @@ public class myJugador implements Jugador, IAuto {
 
     private int heuristic(Tauler board, int color) {
         int opponentColor = -color;
-        
-        for (int col = 0; col < board.getMida(); col++) {
-            if (board.solucio(col, color)) {
-                return 1000;
-            }
-            if (board.solucio(col, opponentColor)) {
-                return -1000;
-            }
-        }
-
         return 0;
     }
 
