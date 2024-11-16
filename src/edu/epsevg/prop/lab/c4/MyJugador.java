@@ -22,7 +22,9 @@ public class MyJugador implements Jugador, IAuto {
                 Tauler newBoard = new Tauler(t);
                 newBoard.afegeix(col, color);
 
+                //int score = minimaxNoPoda(newBoard, maxDepth - 1, false, color); // , Integer.MIN_VALUE, Integer.MAX_VALUE
                 int score = minimax(newBoard, maxDepth - 1, false, color, Integer.MIN_VALUE, Integer.MAX_VALUE);
+                
                 if (score > bestScore) {
                     bestScore = score;
                     bestMove = col;
@@ -35,11 +37,8 @@ public class MyJugador implements Jugador, IAuto {
         return bestMove;
     }
 
-
-    
     private int minimax(Tauler board, int depth, boolean isMaximizing, int color, int alpha, int beta) {
-
-        if (depth == 0) {
+        if (depth == 0 || !board.espotmoure()) {
             return heuristic(board, color);
         }
     
@@ -52,7 +51,6 @@ public class MyJugador implements Jugador, IAuto {
     
                     int eval = minimax(newBoard, depth - 1, false, color, alpha, beta);
                     maxEval = Math.max(maxEval, eval);
-
                     alpha = Math.max(alpha, eval);
                     if (beta <= alpha) {
                         break;
@@ -69,11 +67,43 @@ public class MyJugador implements Jugador, IAuto {
     
                     int eval = minimax(newBoard, depth - 1, true, color, alpha, beta);
                     minEval = Math.min(minEval, eval);
-
                     beta = Math.min(beta, eval);
                     if (beta <= alpha) {
                         break;
                     }
+                }
+            }
+            return minEval;
+        }
+    }
+    
+    private int minimaxNoPoda(Tauler board, int depth, boolean isMaximizing, int color) {
+
+        if (depth == 0 || !board.espotmoure()) {
+            return heuristic(board, color);
+        }
+    
+        if (isMaximizing) {
+            int maxEval = Integer.MIN_VALUE;
+            for (int col = 0; col < board.getMida(); col++) {
+                if (board.movpossible(col)) {
+                    Tauler newBoard = new Tauler(board);
+                    newBoard.afegeix(col, color);
+    
+                    int eval = minimaxNoPoda(newBoard, depth - 1, false, color);
+                    maxEval = Math.max(maxEval, eval);
+                }
+            }
+            return maxEval;
+        } else {
+            int minEval = Integer.MAX_VALUE;
+            for (int col = 0; col < board.getMida(); col++) {
+                if (board.movpossible(col)) {
+                    Tauler newBoard = new Tauler(board);
+                    newBoard.afegeix(col, -color);
+    
+                    int eval = minimaxNoPoda(newBoard, depth - 1, true, color);
+                    minEval = Math.min(minEval, eval);
                 }
             }
             return minEval;
