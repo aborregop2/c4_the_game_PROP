@@ -1,6 +1,4 @@
 package edu.epsevg.prop.lab.c4;
-import java.util.HashSet;
-
 
 public class MyJugador implements Jugador, IAuto {
     private int maxDepth;
@@ -144,13 +142,13 @@ public class MyJugador implements Jugador, IAuto {
         return score;
     }
     
-    private int evaluateDirection(Tauler board, int row, int col, int color, int dRow, int dCol) {
+    private int evaluateDirection(Tauler board, int row, int col, int color, int direccioRow, int direccioCol) {
         int size = board.getMida();
         int count = 0;
     
         for (int i = 0; i < 4; i++) {
-            int newRow = row + i * dRow;
-            int newCol = col + i * dCol;
+            int newRow = row + i * direccioRow;
+            int newCol = col + i * direccioCol;
     
             if (newRow >= 0 && newRow < size && newCol >= 0 && newCol < size && board.getColor(newRow, newCol) == color) {
                 count++;
