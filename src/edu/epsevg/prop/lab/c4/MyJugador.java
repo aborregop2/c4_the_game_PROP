@@ -20,7 +20,7 @@ public class MyJugador implements Jugador, IAuto {
                 Tauler newBoard = new Tauler(t);
                 newBoard.afegeix(col, color);
 
-                //int score = minimaxNoPoda(newBoard, maxDepth - 1, false, color); // , Integer.MIN_VALUE, Integer.MAX_VALUE
+                //int score = minimaxNoPoda(newBoard, maxDepth - 1, false, color);
                 int score = minimax(newBoard, maxDepth - 1, false, color, Integer.MIN_VALUE, Integer.MAX_VALUE);
                 
                 if (score > bestScore) {
