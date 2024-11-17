@@ -1,14 +1,33 @@
 package edu.epsevg.prop.lab.c4;
 
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * La classe MyJugador implementa la interfície Jugador i IAuto per crear un jugador que utilitza l'algorisme Minimax amb poda alfa-beta
+ * per calcular el millor moviment en un joc de Tauler.
+ * Aquesta classe també manté un comptador de càlculs heurístics realitzats.
+ */
 public class MyJugador implements Jugador, IAuto {
-    private int maxDepth;
-    private int heristicsCalculations = 0;
+    public int maxDepth;
+    public int heristicsCalculations = 0;
 
-
+    /**
+     * Constructor que inicialitza la profunditat màxima per al Minimax.
+     *
+     * @param depth profunditat màxima de recursió
+     */
     public MyJugador(int depth) {
         this.maxDepth = depth;
     }
 
+    /**
+     * Realitza el moviment utilitzant l'algorisme Minimax amb poda alfa-beta.
+     *
+     * @param t    el tauler on es realitza el moviment
+     * @param color el color de l'agent que fa el moviment
+     * @return el moviment que ha de realitzar el jugador
+     */
     @Override
     public int moviment(Tauler t, int color) {
         int bestScore = Integer.MIN_VALUE;
@@ -20,7 +39,6 @@ public class MyJugador implements Jugador, IAuto {
                 Tauler newBoard = new Tauler(t);
                 newBoard.afegeix(col, color);
 
-                //int score = minimaxNoPoda(newBoard, maxDepth - 1, false, color);
                 int score = minimax(newBoard, maxDepth - 1, false, color, Integer.MIN_VALUE, Integer.MAX_VALUE);
                 
                 if (score > bestScore) {
@@ -30,19 +48,34 @@ public class MyJugador implements Jugador, IAuto {
             }
         }
 
-        System.out.println("Heuristics calculations: " + heristicsCalculations);
+        System.out.println("Càlculs heurístics: " + heristicsCalculations);
         
         return bestMove;
     }
 
-    private int minimax(Tauler board, int depth, boolean isMaximizing, int color, int alpha, int beta) {
+    /**
+     * Algorisme Minimax amb poda alfa-beta per calcular el millor moviment.
+     *
+     * @param board el tauler actual
+     * @param depth la profunditat restant per explorar
+     * @param isMaximizing si és el torn de maximitzar (jugador) o minimitzar (oponent)
+     * @param color el color de l'agent
+     * @param alpha el valor de poda alfa
+     * @param beta el valor de poda beta
+     * @return el valor heurístic del millor moviment
+     */
+    public int minimax(Tauler board, int depth, boolean isMaximizing, int color, int alpha, int beta) {
         if (depth == 0 || !board.espotmoure()) {
+            heristicsCalculations++;
             return heuristic(board, color);
         }
     
+        List<Integer> movimentsOrdenats = ordenarMoviments(board, color, isMaximizing);
+    
         if (isMaximizing) {
             int maxEval = Integer.MIN_VALUE;
-            for (int col = 0; col < board.getMida(); col++) {
+            for (int i = 0; i < movimentsOrdenats.size(); i++) {
+                int col = movimentsOrdenats.get(i);
                 if (board.movpossible(col)) {
                     Tauler newBoard = new Tauler(board);
                     newBoard.afegeix(col, color);
@@ -58,12 +91,15 @@ public class MyJugador implements Jugador, IAuto {
             return maxEval;
         } else {
             int minEval = Integer.MAX_VALUE;
-            for (int col = 0; col < board.getMida(); col++) {
+            for (int i = 0; i < movimentsOrdenats.size(); i++) {
+                int col = movimentsOrdenats.get(i);
                 if (board.movpossible(col)) {
                     Tauler newBoard = new Tauler(board);
                     newBoard.afegeix(col, -color);
     
                     int eval = minimax(newBoard, depth - 1, true, color, alpha, beta);
+                    // int eval = minimaxNoPoda(newBoard, depth - 1, true, color);
+
                     minEval = Math.min(minEval, eval);
                     beta = Math.min(beta, eval);
                     if (beta <= alpha) {
@@ -75,7 +111,62 @@ public class MyJugador implements Jugador, IAuto {
         }
     }
     
-    private int minimaxNoPoda(Tauler board, int depth, boolean isMaximizing, int color) {
+    /**
+     * Ordena els possibles moviments en funció de la seva valoració heurística.
+     *
+     * @param board el tauler actual
+     * @param color el color de l'agent
+     * @param isMaximizing si és el torn de maximitzar o minimitzar
+     * @return una llista ordenada dels moviments possibles
+     */
+    public List<Integer> ordenarMoviments(Tauler board, int color, boolean isMaximizing) {
+        List<Integer> moviments = new ArrayList<>();
+        for (int col = 0; col < board.getMida(); col++) {
+            if (board.movpossible(col)) {
+                moviments.add(col);
+            }
+        }
+    
+        moviments.sort((col1, col2) -> {
+            int color1;
+            int color2;
+        
+            if (isMaximizing) {
+                color1 = color;
+                color2 = color;
+            } else {
+                color1 = -color;
+                color2 = -color;
+            }
+        
+            Tauler board1 = new Tauler(board);
+            board1.afegeix(col1, color1);
+            int heuristica1 = heuristic(board1, color);
+        
+            Tauler board2 = new Tauler(board);
+            board2.afegeix(col2, color2);
+            int heuristica2 = heuristic(board2, color);
+        
+            if (isMaximizing) {
+                return Integer.compare(heuristica2, heuristica1);
+            } else {
+                return Integer.compare(heuristica1, heuristica2);
+            }
+        });        
+    
+        return moviments;
+    }    
+
+    /**
+     * Algorisme Minimax sense poda alfa-beta per calcular el millor moviment.
+     *
+     * @param board el tauler actual
+     * @param depth la profunditat restant per explorar
+     * @param isMaximizing si és el torn de maximitzar (jugador) o minimitzar (oponent)
+     * @param color el color de l'agent
+     * @return el valor heurístic del millor moviment
+     */
+    public int minimaxNoPoda(Tauler board, int depth, boolean isMaximizing, int color) {
 
         if (depth == 0 || !board.espotmoure()) {
             return heuristic(board, color);
@@ -108,10 +199,14 @@ public class MyJugador implements Jugador, IAuto {
         }
     }
     
-    
-
-    private int heuristic(Tauler board, int color) {
-        heristicsCalculations++;
+    /**
+     * Calcula la puntuació heurística d'un tauler.
+     *
+     * @param board el tauler actual
+     * @param color el color de l'agent
+     * @return la puntuació heurística del tauler
+     */
+    public int heuristic(Tauler board, int color) {
         int opponentColor = -color;
         int score = 0;
     
@@ -131,7 +226,16 @@ public class MyJugador implements Jugador, IAuto {
         return score;
     }
     
-    private int evaluatePosition(Tauler board, int row, int col, int color) {
+    /**
+     * Avalua la posició d'una peça al tauler.
+     *
+     * @param board el tauler actual
+     * @param row la fila on es troba la peça
+     * @param col la columna on es troba la peça
+     * @param color el color de la peça
+     * @return la puntuació resultant de la posició de la peça
+     */
+    public int evaluatePosition(Tauler board, int row, int col, int color) {
         int score = 0;
     
         score += evaluateDirection(board, row, col, color, 1, 0);
@@ -142,7 +246,18 @@ public class MyJugador implements Jugador, IAuto {
         return score;
     }
     
-    private int evaluateDirection(Tauler board, int row, int col, int color, int direccioRow, int direccioCol) {
+    /**
+     * Avalua la direcció d'una peça en una direcció específica (horitzontal, vertical, diagonal).
+     *
+     * @param board el tauler actual
+     * @param row la fila inicial
+     * @param col la columna inicial
+     * @param color el color de la peça
+     * @param direccioRow la direcció de la fila
+     * @param direccioCol la direcció de la columna
+     * @return la puntuació resultant de la direcció evaluada
+     */
+    public int evaluateDirection(Tauler board, int row, int col, int color, int direccioRow, int direccioCol) {
         int size = board.getMida();
         int count = 0;
     
@@ -164,8 +279,11 @@ public class MyJugador implements Jugador, IAuto {
 
         return 0;
     }
-    
 
+    /**
+     *
+     * @return
+     */
     @Override
     public String nom() {
         return "MyJugador";
