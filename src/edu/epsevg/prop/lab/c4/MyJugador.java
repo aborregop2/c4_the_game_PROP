@@ -286,9 +286,9 @@ public class MyJugador implements Jugador, IAuto {
 
         if (count + buitsCount >= 4) {
             if (count == 4)                   score += 1000;
-            if (count == 3 && buitsCount > 0) score += 150;
-            if (count == 2 && buitsCount > 0) score += 30;
-            if (count == 1 && buitsCount > 0) score += 5;
+            if (count == 3 && buitsCount > 0) score += 100;
+            if (count == 2 && buitsCount > 0) score += 10;
+            if (count == 1 && buitsCount > 0) score += 1;
         }
 
         return score;
