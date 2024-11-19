@@ -301,7 +301,7 @@ public class MyJugador implements Jugador, IAuto {
      * @param color el color de l'agent
      * @return el bonus de puntuació
      */
-    private int controlCenter(Tauler board, int color) {
+    public int controlCenter(Tauler board, int color) {
         int centerCol = board.getMida() / 2;
         int score = 0;
 
