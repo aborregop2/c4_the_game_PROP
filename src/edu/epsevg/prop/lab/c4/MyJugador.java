@@ -98,7 +98,7 @@ public class MyJugador implements Jugador, IAuto {
                     newBoard.afegeix(col, -color);
     
                     int eval = minimax(newBoard, depth - 1, true, color, alpha, beta);
-                    // int eval = minimaxNoPoda(newBoard, depth - 1, true, color);
+                    //int eval = minimaxNoPoda(newBoard, depth - 1, true, color);
 
                     minEval = Math.min(minEval, eval);
                     beta = Math.min(beta, eval);
@@ -167,7 +167,7 @@ public class MyJugador implements Jugador, IAuto {
      * @return el valor heurístic del millor moviment
      */
     public int minimaxNoPoda(Tauler board, int depth, boolean isMaximizing, int color) {
-
+        heristicsCalculations++;
         if (depth == 0 || !board.espotmoure()) {
             return heuristic(board, color);
         }
@@ -184,7 +184,8 @@ public class MyJugador implements Jugador, IAuto {
                 }
             }
             return maxEval;
-        } else {
+        } 
+        else {
             int minEval = Integer.MAX_VALUE;
             for (int col = 0; col < board.getMida(); col++) {
                 if (board.movpossible(col)) {
@@ -209,23 +210,24 @@ public class MyJugador implements Jugador, IAuto {
     public int heuristic(Tauler board, int color) {
         int opponentColor = -color;
         int score = 0;
-    
+
         for (int row = 0; row < board.getMida(); row++) {
             for (int col = 0; col < board.getMida(); col++) {
                 int currentColor = board.getColor(row, col);
-    
+
                 if (currentColor == color) {
                     score += evaluatePosition(board, row, col, color);
-                } 
-                else if (currentColor == opponentColor) {
+                } else if (currentColor == opponentColor) {
                     score -= evaluatePosition(board, row, col, opponentColor);
                 }
             }
         }
-    
+
+        score += controlCenter(board, color);
+
         return score;
     }
-    
+
     /**
      * Avalua la posició d'una peça al tauler.
      *
@@ -237,17 +239,18 @@ public class MyJugador implements Jugador, IAuto {
      */
     public int evaluatePosition(Tauler board, int row, int col, int color) {
         int score = 0;
-    
+
+
         score += evaluateDirection(board, row, col, color, 1, 0);
         score += evaluateDirection(board, row, col, color, 0, 1);
         score += evaluateDirection(board, row, col, color, 1, 1);
         score += evaluateDirection(board, row, col, color, 1, -1);
-    
+
         return score;
     }
-    
+
     /**
-     * Avalua la direcció d'una peça en una direcció específica (horitzontal, vertical, diagonal).
+     * Avalua la direcció d'una peça en una direcció específica.
      *
      * @param board el tauler actual
      * @param row la fila inicial
@@ -259,26 +262,58 @@ public class MyJugador implements Jugador, IAuto {
      */
     public int evaluateDirection(Tauler board, int row, int col, int color, int direccioRow, int direccioCol) {
         int size = board.getMida();
-        int count = 0;
-    
+        int count = 0, buitsCount = 0, score = 0;
+
         for (int i = 0; i < 4; i++) {
             int newRow = row + i * direccioRow;
             int newCol = col + i * direccioCol;
-    
-            if (newRow >= 0 && newRow < size && newCol >= 0 && newCol < size && board.getColor(newRow, newCol) == color) {
-                count++;
+
+            if (newRow >= 0 && newRow < size && newCol >= 0 && newCol < size) {
+                int cellColor = board.getColor(newRow, newCol);
+                if (cellColor == color) {
+                    count++;
+                } 
+                else if (cellColor == 0) {
+                    buitsCount++;
+                } 
+                else {
+                    break;
+                }
             } else {
                 break;
             }
         }
-    
-        if (count == 4) return 1000;
-        if (count == 3) return 100;
-        if (count == 2) return 10;
-        if (count == 1) return 1;
 
-        return 0;
+        if (count + buitsCount >= 4) {
+            if (count == 4)                   score += 1000;
+            if (count == 3 && buitsCount > 0) score += 150;
+            if (count == 2 && buitsCount > 0) score += 30;
+            if (count == 1 && buitsCount > 0) score += 5;
+        }
+
+        return score;
     }
+
+    /**
+     * Calcula un bonus per controlar el centre del tauler.
+     *
+     * @param board el tauler actual
+     * @param color el color de l'agent
+     * @return el bonus de puntuació
+     */
+    private int controlCenter(Tauler board, int color) {
+        int centerCol = board.getMida() / 2;
+        int score = 0;
+
+        for (int row = 0; row < board.getMida(); row++) {
+            if (board.getColor(row, centerCol) == color) {
+                score += 10;
+            }
+        }
+
+        return score;
+    }
+
 
     /**
      *
